@@ -1,68 +1,140 @@
-# GigShield AI — Parametric Microinsurance Platform
+<div align="center">
 
-> Zero-touch auto-claim insurance for gig economy workers. Triggered by real weather, AQI, and flood data.
+# 🛡️ GigShield AI
+
+### Parametric Microinsurance Platform for Gig Economy Workers
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+
+> **Zero-touch auto-claim insurance powered by real-time weather, AQI, and flood intelligence.**
+
+GigShield AI is a smart microinsurance platform for delivery riders, drivers, and daily wage earners. It automatically detects environmental disruptions and instantly processes eligible claims using AI-driven parametric triggers — no paperwork, no waiting, no hassle.
+
+[Features](#-key-features) • [Architecture](#-system-architecture) • [Quick Start](#-quick-start) • [API Docs](#-api-endpoints) • [ML Models](#-machine-learning-models)
+
+</div>
 
 ---
 
-## 🏗 Project Structure
+## 🎯 The Problem
+
+Millions of gig workers lose daily income due to floods, heavy rainfall, hazardous air quality, and extreme weather. Traditional insurance systems fail them by:
+
+- Requiring extensive paperwork
+- Taking weeks for claim approval
+- Having high operational costs
+- Being completely inaccessible for informal workers
+
+---
+
+## ✨ Key Features
+
+| Feature | Description |
+|---|---|
+| ⚡ **Auto Claims** | Claims triggered instantly on rainfall, floods, AQI spikes, and extreme weather |
+| 🤖 **AI Fraud Detection** | Isolation Forest ML models detect suspicious claim patterns in real-time |
+| 💳 **Instant UPI Payouts** | Approved claims paid out automatically via Razorpay APIs |
+| 📡 **Live Environmental Monitoring** | Integrated with Open-Meteo, AQI, and GPS APIs |
+| 📊 **Dynamic Premium Engine** | Premiums calculated from zone risk, seasonal data, and claim history |
+
+---
+
+## 🏗️ System Architecture
+
+```
+         ┌──────────────────────────┐
+         │     External APIs        │
+         │  Weather  •  AQI  •  GPS │
+         └────────────┬─────────────┘
+                      │
+                      ▼
+  ┌───────────────────────────────────────┐
+  │            FastAPI Backend            │
+  │  Auth • Policies • Claims • Fraud     │
+  └────────────────┬──────────────────────┘
+                   │
+          ┌────────┴─────────┐
+          ▼                  ▼
+   ┌─────────────┐    ┌──────────────┐
+   │ PostgreSQL  │    │ Redis+Celery │
+   └─────────────┘    └──────┬───────┘
+                             │
+                             ▼
+                      ┌─────────────┐
+                      │ Razorpay API│
+                      └─────────────┘
+```
+
+---
+
+## 🔄 Automated Claim Workflow
+
+```
+Celery Scheduler
+      │
+      ▼
+Fetch Weather + AQI Data
+      │
+      ▼
+Check Trigger Thresholds
+      │
+      ▼
+Find Active Workers in Zone
+      │
+      ▼
+Run Fraud Detection
+      │
+   ┌──┴──┐
+   ▼     ▼
+Auto   Manual
+Payout Review
+(UPI)
+```
+
+---
+
+## 🧠 Technology Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | FastAPI (Python) |
+| Frontend | React.js |
+| Mobile | Flutter |
+| Database | PostgreSQL |
+| Queue System | Redis + Celery |
+| Machine Learning | Scikit-learn |
+| Authentication | JWT |
+| Payments | Razorpay |
+| Containerization | Docker |
+
+---
+
+## 📁 Project Structure
 
 ```
 GigShield/
-├── backend/                     # FastAPI Backend
-│   ├── app/
-│   │   ├── main.py             # Entry point
-│   │   ├── config.py           # Env settings
-│   │   ├── database.py         # PostgreSQL connection
-│   │   ├── models/             # SQLAlchemy DB models
-│   │   │   ├── user.py
-│   │   │   ├── policy.py
-│   │   │   ├── claim.py
-│   │   │   └── trigger.py
-│   │   ├── schemas/            # Pydantic schemas
-│   │   │   ├── user_schema.py
-│   │   │   ├── policy_schema.py
-│   │   │   └── claim_schema.py
-│   │   ├── api/                # REST API routes
-│   │   │   ├── auth.py
-│   │   │   ├── user.py
-│   │   │   ├── policy.py
-│   │   │   ├── claim.py
-│   │   │   └── admin.py
-│   │   ├── services/           # Business logic
-│   │   │   ├── premium_service.py
-│   │   │   ├── claim_service.py
-│   │   │   ├── trigger_service.py
-│   │   │   └── fraud_service.py
-│   │   ├── integrations/       # External APIs
-│   │   │   ├── weather_api.py  # Open-Meteo (free)
-│   │   │   ├── aqi_api.py      # WAQI
-│   │   │   ├── maps_api.py     # Google Maps / GPS
-│   │   │   └── payment_api.py  # Razorpay UPI
-│   │   ├── ml/                 # ML Models
-│   │   │   ├── premium_model.py
-│   │   │   ├── fraud_model.py  # Isolation Forest
-│   │   │   └── train.py
-│   │   ├── workers/            # Celery background jobs
-│   │   │   ├── celery_worker.py
-│   │   │   └── tasks.py
-│   │   ├── utils/
-│   │   │   ├── helpers.py
-│   │   │   └── constants.py
-│   │   └── core/
-│   │       ├── security.py     # JWT
-│   │       └── dependencies.py
-│   ├── requirements.txt
-│   ├── .env
-│   └── Dockerfile
-├── frontend/                   # React Admin Panel (see gigshield.html)
-├── mobile/                     # Flutter Worker App
+├── backend/
+│   └── app/
+│       ├── main.py
+│       ├── config.py
+│       ├── database.py
+│       ├── models/          # SQLAlchemy ORM models
+│       ├── schemas/         # Pydantic request/response schemas
+│       ├── api/             # Route handlers
+│       ├── services/        # Business logic
+│       ├── integrations/    # Weather, AQI, GPS clients
+│       ├── ml/              # Fraud detection & premium models
+│       ├── workers/         # Celery background tasks
+│       ├── utils/
+│       └── core/
+├── frontend/                # React Admin Dashboard
+├── mobile/                  # Flutter Worker App
 ├── scripts/
-│   ├── seed_data.py
-│   └── test_triggers.py
 ├── docs/
-│   ├── API_Docs.md
-│   ├── Architecture.md
-│   └── Demo_Script.md
 ├── docker-compose.yml
 └── README.md
 ```
@@ -71,106 +143,185 @@ GigShield/
 
 ## 🚀 Quick Start
 
-### 1. Clone & Configure
+### Prerequisites
+
+- [Docker](https://www.docker.com/get-started) & Docker Compose
+- Git
+
+### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/your-org/gigshield.git
 cd GigShield
-cp backend/.env.example backend/.env
-# Edit backend/.env with your API keys
 ```
 
-### 2. Run with Docker Compose
+### 2. Configure Environment Variables
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Edit `backend/.env` with your API keys and secrets (see [Environment Variables](#%EF%B8%8F-environment-variables)).
+
+### 3. Start with Docker Compose
+
 ```bash
 docker-compose up --build
 ```
 
-This starts:
-- PostgreSQL on port 5432
-- Redis on port 6379
-- FastAPI backend on port 8000
-- Celery worker + beat scheduler
+This spins up: PostgreSQL, Redis, FastAPI backend, Celery workers, and scheduler services.
 
-### 3. Seed demo data
+### 4. Seed Demo Data
+
 ```bash
 docker-compose exec backend python scripts/seed_data.py
 ```
 
-### 4. Open the frontend
-Open `gigshield.html` in your browser — the frontend is a self-contained single-page app.
+### 5. Open API Documentation
 
-### 5. API Docs
 Visit [http://localhost:8000/docs](http://localhost:8000/docs) for interactive Swagger UI.
 
 ---
 
 ## 🔑 Demo Credentials
 
-| Role   | Email / Username       | Password    |
-|--------|------------------------|-------------|
-| Admin  | `admin@gigshield.com`  | `admin123`  |
-| Worker | `rahul@gmail.com`      | `password123` |
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@gigshield.com | admin123 |
+| Worker | rahul@gmail.com | password123 |
 
----
-
-## ⚙️ Environment Variables
-
-| Variable              | Description                          | Required |
-|-----------------------|--------------------------------------|----------|
-| `DATABASE_URL`        | PostgreSQL connection string         | ✅        |
-| `SECRET_KEY`          | JWT signing secret                   | ✅        |
-| `OPENWEATHER_API_KEY` | OpenWeatherMap key (optional)        | ❌        |
-| `WAQI_API_KEY`        | WAQI AQI API token (optional)        | ❌        |
-| `GOOGLE_MAPS_KEY`     | Google Maps API key (optional)       | ❌        |
-| `RAZORPAY_KEY_ID`     | Razorpay key ID (optional)           | ❌        |
-| `RAZORPAY_KEY_SECRET` | Razorpay key secret (optional)       | ❌        |
-| `REDIS_URL`           | Redis connection URL                 | ✅        |
-
-> All external API keys are optional — the system uses free/demo fallbacks when not provided.
-
----
-
-## 🤖 ML Models
-
-Train models locally:
-```bash
-cd backend
-python -m app.ml.train
-```
-
-- **Premium Model** — Random Forest regressor predicting weekly premium from zone, season, plan, and history
-- **Fraud Model** — Isolation Forest anomaly detector trained on clean claim patterns
-
----
-
-## 🔄 Auto-Claim Pipeline
-
-```
-Celery Beat (every 5 min)
-  → evaluate_triggers(city)        # fetch weather + AQI
-  → any_triggered?
-      YES → find active workers in city
-          → compute_fraud_score()
-          → auto_approved?
-              YES → initiate_upi_payout()   # Razorpay
-              NO  → flag for manual review
-```
+> ⚠️ Change these before any production deployment.
 
 ---
 
 ## 📡 API Endpoints
 
-| Method | Path                      | Description               |
-|--------|---------------------------|---------------------------|
-| POST   | `/api/auth/register`      | Worker registration       |
-| POST   | `/api/auth/login`         | Worker login              |
-| POST   | `/api/auth/admin-login`   | Admin login               |
-| GET    | `/api/users/me`           | Get current user          |
-| GET    | `/api/users/`             | List all workers (admin)  |
-| POST   | `/api/policies/`          | Create policy             |
-| GET    | `/api/policies/`          | List policies             |
-| POST   | `/api/claims/`            | File a claim              |
-| GET    | `/api/claims/`            | List claims               |
-| POST   | `/api/claims/decide`      | Approve/reject (admin)    |
-| GET    | `/api/admin/dashboard`    | Admin dashboard stats     |
+### Authentication
 
-Full Swagger docs at `/docs`.
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Worker registration |
+| POST | `/api/auth/login` | Worker login |
+| POST | `/api/auth/admin-login` | Admin login |
+
+### Users
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/users/me` | Get current user |
+| GET | `/api/users/` | List all workers (admin) |
+
+### Policies
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/policies/` | Create a policy |
+| GET | `/api/policies/` | List policies |
+
+### Claims
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/claims/` | File a claim |
+| GET | `/api/claims/` | List claims |
+| POST | `/api/claims/decide` | Approve or reject a claim (admin) |
+
+### Admin
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/admin/dashboard` | Platform-wide statistics |
+
+---
+
+## 🤖 Machine Learning Models
+
+### Premium Prediction (Random Forest Regressor)
+
+Predicts personalized insurance premiums using:
+- Seasonal and historical weather data
+- Zone risk scores
+- Worker claim history
+- Worker category (rider, driver, etc.)
+
+### Fraud Detection (Isolation Forest)
+
+Flags suspicious claims by analyzing:
+- Claim frequency anomalies
+- GPS/location mismatches
+- Environmental trigger inconsistencies
+- Behavioral patterns over time
+
+---
+
+## ⚙️ Environment Variables
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `SECRET_KEY` | JWT signing secret |
+| `REDIS_URL` | Redis connection string |
+| `OPENWEATHER_API_KEY` | Open-Meteo / OpenWeather API key |
+| `WAQI_API_KEY` | World AQI API key |
+| `GOOGLE_MAPS_KEY` | Google Maps / GPS services key |
+| `RAZORPAY_KEY_ID` | Razorpay payment gateway key |
+| `RAZORPAY_KEY_SECRET` | Razorpay payment gateway secret |
+
+---
+
+## 🔐 Security
+
+- JWT-based authentication with refresh tokens
+- Bcrypt password hashing
+- Role-Based Access Control (Worker / Admin)
+- Input validation via Pydantic schemas
+- Dockerized infrastructure with environment isolation
+
+---
+
+## 📈 Roadmap
+
+- [ ] Hyperlocal flood prediction via satellite data
+- [ ] Blockchain-based claim verification
+- [ ] WhatsApp onboarding flow
+- [ ] Multi-language support (Hindi, Tamil, Telugu, etc.)
+- [ ] Advanced AI risk scoring engine
+- [ ] Offline-first Flutter mobile app
+
+---
+
+## 🏆 Impact
+
+✅ Instant insurance settlements — from weeks to seconds  
+✅ Reduced fraud losses via ML anomaly detection  
+✅ Financial inclusion for millions of gig workers  
+✅ Climate resilience support for vulnerable communities  
+✅ Scalable low-cost insurance operations  
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please open an issue first to discuss what you'd like to change, then submit a pull request.
+
+1. Fork the repo
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+**Built with ❤️ for gig workers everywhere.**
+
+*GigShield AI — Automated Protection. Instant Payouts. Zero Paperwork.*
+
+</div>
